@@ -1,8 +1,9 @@
 #include <GL/glew.h>
 
-#include "projectwindow.hpp"
+#include "openglwidget.hpp"
 
 #include <array>
+#include <iostream>
 
 namespace
 {
@@ -35,9 +36,17 @@ namespace
 	std::array<GLuint, 6> indices = { 0, 1, 2, 0, 1, 3 };
 }
 
-void ProjectWindow::initialize()
+void OpenGLWidget::initializeGL()
 {
-	OpenGLWindow::initialize();
+	glewExperimental = GL_TRUE; // this is needed for glGenVertexArrays and other functions to exist
+	GLenum glewErr = glewInit();
+	if (glewErr != GLEW_OK)
+	{
+		std::cerr << "glewInit failed : " << glewGetErrorString(glewErr) << std::endl;
+		return;
+	}
+
+	initializeOpenGLFunctions();
 
 	// this is needed since OpenGL 3.2+ Core profile
 	GLuint vertex_array_id;
@@ -58,7 +67,10 @@ void ProjectWindow::initialize()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void ProjectWindow::render()
+void OpenGLWidget::resizeGL(int w, int h)
+{}
+
+void OpenGLWidget::paintGL()
 {
 	const qreal retinaScale = devicePixelRatio();
 	glViewport(0, 0, width() * retinaScale, height() * retinaScale);
