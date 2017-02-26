@@ -1,19 +1,25 @@
 #include "mainwindow.h"
-
-#include <GL/glew.h>
-#include <SDL.h>
+#include "sdlwindow.hpp"
 
 #include <QApplication>
-
-#define BABI_OGL_VERSION 330
-#define BABI_OGL_MAJOR_VERSION 3
-#define BABI_OGL_MINOR_VERSION 3
+#include <qsurfaceformat.h>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+	QGuiApplication app(argc, argv);
 
-    return a.exec();
+	QSurfaceFormat format;
+	format.setSamples(16);
+	format.setMajorVersion(3);
+	format.setMinorVersion(3);
+	format.setProfile(QSurfaceFormat::CoreProfile);
+
+	SdlWindow window;
+	window.setFormat(format);
+	window.resize(1024, 768);
+	window.show();
+
+	window.setAnimating(true);
+
+	return app.exec();
 }
