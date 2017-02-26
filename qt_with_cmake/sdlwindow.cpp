@@ -1,4 +1,8 @@
+#include <GL/glew.h>
+
 #include "sdlwindow.hpp"
+
+
 
 #include <array>
 
@@ -32,10 +36,12 @@ std::array<GLuint, 6> indices = { 0, 1, 2, 0, 1, 3 };
 
 void SdlWindow::initialize()
 {
+	OpenGLWindow::initialize();
+
 	// this is needed since OpenGL 3.2+ Core profile
 	GLuint vertex_array_id;
-	m_funcs->glGenVertexArrays(1, &vertex_array_id);
-	m_funcs->glBindVertexArray(vertex_array_id);
+	glGenVertexArrays(1, &vertex_array_id);
+	glBindVertexArray(vertex_array_id);
 
 	// set clear color to red (because the default color of vertex is black)
 	glClearColor(1.0f, 0.0f, 0.0f, 0.0f);

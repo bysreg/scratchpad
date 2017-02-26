@@ -1,8 +1,8 @@
 #pragma once
 
+#include <GL/glew.h>
 #include <QWindow.h>
 #include <QOpenGLFunctions>
-#include <QOpenGLFunctions_3_3_Core>
 
 class OpenGLWindow : public QWindow, protected QOpenGLFunctions
 {
@@ -18,16 +18,13 @@ public:
 
 	void setAnimating(bool animating);
 
-	public slots:
+	public Q_SLOTS:
 	void renderLater();
 	void renderNow();
 
 protected:
 	bool event(QEvent *event) override;
-
 	void exposeEvent(QExposeEvent *event) override;
-
-	QOpenGLFunctions_3_3_Core* m_funcs;
 
 private:
 	bool m_animating;

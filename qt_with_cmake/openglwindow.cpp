@@ -3,6 +3,8 @@
 #include <qopenglpaintdevice.h>
 #include <qpainter.h>
 
+#include <iostream>
+
 OpenGLWindow::OpenGLWindow(QWindow *parent)
 	: QWindow(parent)
 	, m_context(0)
@@ -18,6 +20,15 @@ void OpenGLWindow::render(QPainter *painter)
 
 void OpenGLWindow::initialize()
 {
+	glewExperimental = GL_TRUE; // this is needed for glGenVertexArrays and other functions to exist
+	GLenum glewErr = glewInit();
+	if (glewErr != GLEW_OK)
+	{
+		std::cerr << "glewInit failed : " << glewGetErrorString(glewErr) << std::endl;
+		return;
+	}
+
+	initializeOpenGLFunctions();
 }
 
 void OpenGLWindow::render()
@@ -75,8 +86,6 @@ void OpenGLWindow::renderNow()
 	m_context->makeCurrent(this);
 
 	if (needsInitialize) {
-		m_funcs = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
-		initializeOpenGLFunctions();
 		initialize();
 	}
 
