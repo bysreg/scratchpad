@@ -2,10 +2,10 @@
 
 #include "openglwindow.hpp"
 
-class SdlWindow : public OpenGLWindow
+class ProjectWindow : public OpenGLWindow
 {
 public:
-	SdlWindow() {}
+	ProjectWindow() {}
 
     void initialize() override;
     void render() override;

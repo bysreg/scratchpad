@@ -55,8 +55,7 @@ include_directories(
 	${GLEW_INCLUDE_DIR}
 )
 
-# Tell CMake to create the helloworld executable
-add_executable(test_qt WIN32 main.cpp mainwindow.cpp mainwindow.h openglwindow.cpp openglwindow.hpp sdlwindow.cpp sdlwindow.hpp)
+add_executable(test_qt WIN32 main.cpp mainwindow.cpp mainwindow.h openglwindow.cpp openglwindow.hpp projectwindow.cpp projectwindow.hpp)
 target_link_libraries(test_qt ${OPENGL_LIBRARIES} ${GLEW_LIBRARY} Qt5::Widgets)
 
 add_custom_command(TARGET test_qt POST_BUILD

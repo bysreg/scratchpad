@@ -1,8 +1,6 @@
 #include <GL/glew.h>
 
-#include "sdlwindow.hpp"
-
-
+#include "projectwindow.hpp"
 
 #include <array>
 
@@ -34,7 +32,7 @@ std::array<Vertex, 4> vertices = {
 // define the indices of the triangle
 std::array<GLuint, 6> indices = { 0, 1, 2, 0, 1, 3 };
 
-void SdlWindow::initialize()
+void ProjectWindow::initialize()
 {
 	OpenGLWindow::initialize();
 
@@ -57,7 +55,7 @@ void SdlWindow::initialize()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void SdlWindow::render()
+void ProjectWindow::render()
 {
 	const qreal retinaScale = devicePixelRatio();
 	glViewport(0, 0, width() * retinaScale, height() * retinaScale);
