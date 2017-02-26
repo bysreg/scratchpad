@@ -26,8 +26,6 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
-set(SDL2_BUILDING_LIBRARY TRUE)
-find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
@@ -41,13 +39,10 @@ if(WIN32)
 		endforeach()
 	endmacro()
 
-	USE_WIN_DEBUG_LIB(SDL2_WIN_LINK_LIBRARY ${SDL2_LIBRARY})
 	USE_WIN_DEBUG_LIB(GLEW_WIN_LINK_LIBRARY ${GLEW_LIBRARY})
 
-	set(SDL2_LIBRARY ${SDL2_WIN_LINK_LIBRARY})
 	set(GLEW_LIBRARY ${GLEW_WIN_LINK_LIBRARY})
 	
-	message("SDL2_LIBRARY var is replaced with : " ${SDL2_LIBRARY})
 	message("GLEW_LIBRARY var is replaced with : " ${GLEW_LIBRARY})
 
 endif()
@@ -58,12 +53,11 @@ set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src")
 include_directories(
 	${PROJECT_INCLUDE_DIR}
 	${GLEW_INCLUDE_DIR}
-	${SDL2_INCLUDE_DIR}
 )
 
 # Tell CMake to create the helloworld executable
 add_executable(test_qt WIN32 main.cpp mainwindow.cpp mainwindow.h openglwindow.cpp openglwindow.hpp sdlwindow.cpp sdlwindow.hpp)
-target_link_libraries(test_qt ${SDL2_LIBRARY} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY} Qt5::Widgets)
+target_link_libraries(test_qt ${OPENGL_LIBRARIES} ${GLEW_LIBRARY} Qt5::Widgets)
 
 add_custom_command(TARGET test_qt POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
