@@ -15,14 +15,61 @@ set(CMAKE_PREFIX_PATH "C:/Qt/5.8/msvc2015_64")
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-# Find the QtWidgets library
 find_package(Qt5Widgets)
+
+set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}")
+
+######## PROJECT DEPENDENCIES #########
+if(WIN32)
+	set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/windows)
+endif()
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+
+find_package(SDL2 REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+
+if(WIN32)
+	macro(USE_WIN_DEBUG_LIB DEBUG_VAR)
+		foreach(LIBRARY_PATH ${ARGN})
+			get_filename_component(LIBRARY_NAME ${LIBRARY_PATH} NAME_WE) 
+			get_filename_component(LIBRARY_DIR ${LIBRARY_PATH} DIRECTORY)
+			# message("iter test library path " ${LIBRARY_PATH})
+			set(${DEBUG_VAR} ${${DEBUG_VAR}} optimized ${LIBRARY_PATH} debug ${LIBRARY_DIR}/${LIBRARY_NAME}_d.lib)
+		endforeach()
+	endmacro()
+
+	USE_WIN_DEBUG_LIB(SDL2_WIN_LINK_LIBRARY ${SDL2_LIBRARY})
+	USE_WIN_DEBUG_LIB(GLEW_WIN_LINK_LIBRARY ${GLEW_LIBRARY})
+
+	set(SDL2_LIBRARY ${SDL2_WIN_LINK_LIBRARY})
+	set(GLEW_LIBRARY ${GLEW_WIN_LINK_LIBRARY})
+	
+	message("SDL2_LIBRARY var is replaced with : " ${SDL2_LIBRARY})
+	message("GLEW_LIBRARY var is replaced with : " ${GLEW_LIBRARY})
+
+endif()
+
+set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src")
+#=====================================
+
+include_directories(
+	${PROJECT_INCLUDE_DIR}
+	${GLEW_INCLUDE_DIR}
+	${SDL2_INCLUDE_DIR}
+)
 
 # Tell CMake to create the helloworld executable
 add_executable(test_qt WIN32 main.cpp mainwindow.cpp mainwindow.h)
-target_link_libraries(test_qt Qt5::Widgets)
+target_link_libraries(test_qt ${SDL2_LIBRARY} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY} Qt5::Widgets)
 
 add_custom_command(TARGET test_qt POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/windows/bin"
+        $<TARGET_FILE_DIR:test_qt>)
+
+add_custom_command(TARGET test_qt POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/windows/lib"
         $<TARGET_FILE_DIR:test_qt>)
