@@ -11,7 +11,7 @@ set(CMAKE_PREFIX_PATH "C:/Qt/5.8/msvc2015_64")
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt5Widgets)
+find_package(Qt5Widgets REQUIRED)
 
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}")
 

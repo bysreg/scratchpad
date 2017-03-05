@@ -22,13 +22,13 @@ int main(int argc, char *argv[])
 	//window.show();
 	//window.setAnimating(true);
 
-	//MainWindow main_window;
-	//main_window.show();
+	MainWindow main_window;
+	main_window.show();
 
-	OpenGLWidget glwidget(nullptr);
-	glwidget.setFormat(format);
-	glwidget.resize(1024, 768);
-	glwidget.show();
+	//OpenGLWidget glwidget(nullptr);
+	//glwidget.setFormat(format);
+	//glwidget.resize(1024, 768);
+	//glwidget.show();
 
 	return app.exec();
 }
