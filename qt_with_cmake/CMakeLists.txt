@@ -49,6 +49,7 @@ set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src")
 include_directories(
 	${PROJECT_INCLUDE_DIR}
 	${GLEW_INCLUDE_DIR}
+	${Qt5Widgets_INCLUDE_DIRS}
 )
 
 qt5_wrap_ui(UI_HEADERS mainwindow.ui)
