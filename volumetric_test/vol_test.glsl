@@ -1,4 +1,4 @@
-// modified by hibe
+// modified by hibe (original : https://www.shadertoy.com/view/MdlyDs)
 // By SebH 
 // https://twitter.com/SebHillaire
 // Use mouse left to rotate camera (X axis) and change noise strength (Y axis)
@@ -41,7 +41,7 @@ const uint packedBunny[1024] = uint[1024](0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u
 
 float sampleBunny(float3 uvs)
 {
-    float3 voxelUvs = max(float3(0.0),min(uvs*float3(BUNNY_VOLUME_SIZE), float3(BUNNY_VOLUME_SIZE)-1.0));
+    float3 voxelUvs = max(float3(0.0),min(uvs*float3(BUNNY_VOLUME_SIZE), float3(BUNNY_VOLUME_SIZE)-1.0)); // clamp between [<0, 0, 0> and <31, 31, 31>]
     uint3 intCoord = uint3(voxelUvs);
     uint arrayCoord = intCoord.x + intCoord.z*uint(BUNNY_VOLUME_SIZE);
 
@@ -142,8 +142,6 @@ float3 worldPosTocubePos(float3 worldPos)
 {
     // cube of world space size 4 with bottom face on the ground y=0
     return worldPos*0.15 + float3(0.0,-0.5,0.0);
-
-    //return worldPos;
 }
 
 // From https://www.shadertoy.com/view/4s23DR
@@ -227,7 +225,6 @@ float distanceAttenuation(float distance)
 void mainImage( out float4 fragColor, in float2 fragCoord )
 {
     float2 uv = fragCoord.xy / iResolution.xy;
-    fragColor = float4(uv,0.5+0.5*sin(iTime),1.0);
     float time = iTime;
 
     vec2 mouseControl = iMouse.xy / iResolution.xy;
@@ -277,7 +274,6 @@ void mainImage( out float4 fragColor, in float2 fragCoord )
             float Ldist = length(Lpos-cubePos);
             float Lattenuation = distanceAttenuation(Ldist);
 
-#if 1
             // Improved scattering integration. See slide 28 at http://www.frostbite.com/2015/08/physically-based-unified-volumetric-rendering-in-frostbite/
             vec3 S = L * Lattenuation * shadow * density *scattering;
             vec3 sampleExtinction = max(vec3(0.0000000001), density * extinction);
@@ -286,7 +282,6 @@ void mainImage( out float4 fragColor, in float2 fragCoord )
 
             // Evaluate transmittance to view independentely
             transmittance *= exp(-sampleExtinction * stepSize);
-#endif
         }
 
         // Apply volumetric on scene
