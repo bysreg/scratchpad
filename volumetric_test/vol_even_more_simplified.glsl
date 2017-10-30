@@ -8,18 +8,6 @@
 #define uint3 uvec3
 #define uint4 uvec4
 
-////////// Parameters
-
-// Participating media properties. have fun tweaking those :)
-float3 scattering = 25.0 * float3(0.25,0.5,1.0);
-float3 absorption = 0.0 * float3(0.75,0.5,0.0);
-
-// Default noise erosion strength
-float erosionStrength = 1.0;
-
-////////// Options
-#define VOLUME_FILTERING_NEAREST 1
-
 //////////////////////////////////////////////////
 // Bunny volume data
 //////////////////////////////////////////////////
@@ -41,85 +29,11 @@ float sampleBunny(float3 uvs)
       uvs.x>1.001 || uvs.y>1.001 || uvs.z>1.001)
         return 0.0;
 
-    // 1 to use nearest instead
-#if VOLUME_FILTERING_NEAREST
     // sample the uint representing a packed volume data of 32 voxel (1 or 0)
     uint bunnyDepthData = packedBunny[arrayCoord];
     float voxel = (bunnyDepthData & (1u<<intCoord.y)) > 0u ? 1.0 : 0.0;
-#else
-    uint3 intCoord2 = min(intCoord+uint3(1), uint3(BUNNY_VOLUME_SIZE-1));
-
-    uint arrayCoord00 = intCoord.x  + intCoord.z *uint(BUNNY_VOLUME_SIZE);
-    uint arrayCoord01 = intCoord.x  + intCoord2.z*uint(BUNNY_VOLUME_SIZE);
-    uint arrayCoord10 = intCoord2.x + intCoord.z *uint(BUNNY_VOLUME_SIZE);
-    uint arrayCoord11 = intCoord2.x + intCoord2.z*uint(BUNNY_VOLUME_SIZE);
-
-    uint bunnyDepthData00 = packedBunny[arrayCoord00];
-    uint bunnyDepthData01 = packedBunny[arrayCoord01];
-    uint bunnyDepthData10 = packedBunny[arrayCoord10];
-    uint bunnyDepthData11 = packedBunny[arrayCoord11];
-
-    float voxel000 = (bunnyDepthData00 & (1u<<intCoord.y)) > 0u ? 1.0 : 0.0;
-    float voxel001 = (bunnyDepthData01 & (1u<<intCoord.y)) > 0u ? 1.0 : 0.0;
-    float voxel010 = (bunnyDepthData10 & (1u<<intCoord.y)) > 0u ? 1.0 : 0.0;
-    float voxel011 = (bunnyDepthData11 & (1u<<intCoord.y)) > 0u ? 1.0 : 0.0;
-    float voxel100 = (bunnyDepthData00 & (1u<<intCoord2.y)) > 0u ? 1.0 : 0.0;
-    float voxel101 = (bunnyDepthData01 & (1u<<intCoord2.y)) > 0u ? 1.0 : 0.0;
-    float voxel110 = (bunnyDepthData10 & (1u<<intCoord2.y)) > 0u ? 1.0 : 0.0;
-    float voxel111 = (bunnyDepthData11 & (1u<<intCoord2.y)) > 0u ? 1.0 : 0.0;
-
-    float3 d = voxelUvs - float3(intCoord);
-
-    voxel000 = mix(voxel000,voxel100, d.y);
-    voxel001 = mix(voxel001,voxel101, d.y);
-    voxel010 = mix(voxel010,voxel110, d.y);
-    voxel011 = mix(voxel011,voxel111, d.y);
-
-    voxel000 = mix(voxel000,voxel010, d.x);
-    voxel001 = mix(voxel001,voxel011, d.x);
-
-    float voxel = mix(voxel000,voxel001, d.z);
-#endif
 
     return voxel;
-}
-
-//////////////////////////////////////////////////
-// Volume noise from somewhere...
-//////////////////////////////////////////////////
-
-float rand(vec3 co)
-{
-    return -1.0 + fract(sin(dot(co.xy,vec2(12.9898 + co.z,78.233))) * 43758.5453) * 2.0;
-}
-
-float linearRand(vec3 uv)
-{
-    vec3 iuv = floor(uv);
-    vec3 fuv = fract(uv);
-
-    float v1 = rand(iuv + vec3(0,0,0));
-    float v2 = rand(iuv + vec3(1,0,0));
-    float v3 = rand(iuv + vec3(0,1,0));
-    float v4 = rand(iuv + vec3(1,1,0));
-
-    float d1 = rand(iuv + vec3(0,0,1));
-    float d2 = rand(iuv + vec3(1,0,1));
-    float d3 = rand(iuv + vec3(0,1,1));
-    float d4 = rand(iuv + vec3(1,1,1));
-
-    return mix(mix(mix(v1,v2,fuv.x),mix(v3,v4,fuv.x),fuv.y),
-               mix(mix(d1,d2,fuv.x),mix(d3,d4,fuv.x),fuv.y),
-               fuv.z);
-}
-
-float linearRandFBM(vec3 uv)
-{
-    float c = (linearRand(uv * 1.0) * 32.0 +
-               linearRand(uv * 2.0) * 16.0 +
-               linearRand(uv * 4.0) * 8.0 +
-               linearRand(uv * 8.0) * 4.0) / 32.0;
-    return c * 0.5 + 0.5;
 }
 
 
@@ -160,11 +74,6 @@ bool cube(vec3 org, vec3 dir, out float near, out float far)
 // Main
 //////////////////////////////////////////////////
 
-float3 L = 4.0 * float3(1.0,1.0,1.0);// incoming luminance from light (ignoring its shape, etc.)
-float3 Lpos = float3(1.0,1.0,1.0);  // in volumetric cube space
-
-#define extinction  (absorption + scattering)
-
 // all volumetric computation are done once position has been transform into unit cube space
 
 // Get density for a position
@@ -175,31 +84,7 @@ float getDensity(float3 cubePos)
     if(density==0.0) return 0.0;    // makes things a tad bit faster
     float3 noiseUV = cubePos*16.0;
     
-    density = density * max(0.0, 0.5 + 0.5*erosionStrength*linearRand(noiseUV));
     return density;
-}
-
-// Get transmittance from a direction and distance onto a point (volume shadows)
-float3 getShadowTransmittance(float3 cubePos, float sampledDistance, float stepSizeShadow)
-{
-    float3 shadow = float3(1.0);
-    float3 Ldir = normalize(Lpos-cubePos);
-    for(float tshadow=0.0; tshadow<sampledDistance; tshadow+=stepSizeShadow)
-    {
-        float3 cubeShadowPos = cubePos + tshadow*Ldir;
-        float densityShadow = getDensity(cubeShadowPos);
-        shadow *= exp(-densityShadow * extinction * stepSizeShadow);
-    }
-    return shadow;
-}
-
-// Returns the light distance attenuation
-float distanceAttenuation(float distance)
-{
-    float lightMaxRadius = 3.0;
-    float linAtt = clamp((lightMaxRadius-distance)/lightMaxRadius,0.0,1.0);
-    linAtt*=linAtt; // some "fake artistic" attenuation
-    return linAtt/(distance*distance);
 }
 
 void mainImage( out float4 fragColor, in float2 fragCoord )
@@ -207,14 +92,9 @@ void mainImage( out float4 fragColor, in float2 fragCoord )
     float2 uv = fragCoord.xy / iResolution.xy;
     float time = iTime;
 
-    vec2 mouseControl = iMouse.xy / iResolution.xy;
-    erosionStrength = iMouse.z>0.0 ? mouseControl.y * 4.0 : erosionStrength;
-
     // View direction in camera space
     float3 viewDir = normalize(float3((fragCoord.xy - iResolution.xy*0.5) / iResolution.y, 1.0));
-    viewDir*= float3(0.9,1.0,1.0);
-
-    Lpos = float3(0.85*cos(.0f*0.55),1.5, 0.85*sin(.0f*1.0)); // hibe: make lighting pos fixed
+    viewDir*= float3(0.9,1.0,1.0);    
 
     float3 color= float3(0.0, 0.0, 0.0);
 
@@ -222,7 +102,6 @@ void mainImage( out float4 fragColor, in float2 fragCoord )
     float  camDist = 10.0;
     float3 camUp = float3(0,1,0);
     float3 camPos = float3(camDist, 8.0, 0); // hibe : make this camera's fixed in-place
-    camPos = iMouse.z<=0.0 ? camPos : float3(camDist*cos(mouseControl.x*10.0),8.0, camDist*sin(mouseControl.x*10.0));
     float3 camTarget = float3(0,3.0,0); // hibe: point where the camera is looking at
 
     // And from them evaluted ray direction in world space
@@ -239,7 +118,7 @@ void mainImage( out float4 fragColor, in float2 fragCoord )
     if (cube(cubeSpacePos, worldDir, near, far))
     {
         float3 scatteredLuminance = float3(0.0,0.0,0.0);
-        float3 transmittance = float3(1.0);
+        // float3 transmittance = float3(1.0);
 
         float stepSize = 0.01;
         for(float t=near; t<far; t+=stepSize)
@@ -247,26 +126,12 @@ void mainImage( out float4 fragColor, in float2 fragCoord )
             float3 cubePos = cubeSpacePos + t*worldDir + 0.5;
             float density = getDensity(cubePos);
 
-            float stepSizeShadow = 0.1;
-            float3 shadow = getShadowTransmittance(cubePos,1.0, 0.1);
-
-
-            float Ldist = length(Lpos-cubePos);
-            float Lattenuation = distanceAttenuation(Ldist);
-
-            // Improved scattering integration. See slide 28 at http://www.frostbite.com/2015/08/physically-based-unified-volumetric-rendering-in-frostbite/
-            vec3 S = L * Lattenuation * shadow * density *scattering;
-            vec3 sampleExtinction = max(vec3(0.0000000001), density * extinction);
-            vec3 Sint = (S - S * exp(-sampleExtinction * stepSize)) / sampleExtinction;
-            scatteredLuminance += transmittance * Sint;
-
-            // Evaluate transmittance to view independentely
-            transmittance *= exp(-sampleExtinction * stepSize);
+			scatteredLuminance += density;
         }
 
-        // Apply volumetric on scene
-        color = transmittance*color + scatteredLuminance;
+        // Apply volumetric on scene        
+        color = scatteredLuminance;
     }
 
-    fragColor = float4(pow(color, float3(1.0/2.2)),1.0); // simple linera to gamma
+    fragColor = float4(color, 1.0);    
 }
