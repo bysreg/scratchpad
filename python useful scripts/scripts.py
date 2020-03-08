@@ -1,9 +1,11 @@
 
 '''
-	replace every files in the current folder with new name from replacement
+    replace every files in the current folder with new name from replacement
 
 '''
-def re_replace(pattern, replacement):
+
+
+def re_replace(pattern, replacement, dry_run):
     import glob
     import re
     import os
