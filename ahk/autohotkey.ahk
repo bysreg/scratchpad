@@ -3,5 +3,5 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
-Capslock::Esc
-~RAlt:: send, {AppsKey}
+Capslock::Esc ; Replace capslock with Escape button
+~RAlt:: send, {AppsKey} ; Replace right alt with right click
