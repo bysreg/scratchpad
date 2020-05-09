@@ -206,7 +206,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 qt5_wrap_ui(UI_HEADERS mainwindow.ui)
 
 # add target for each examples in shader_examples folder
-add_executable(test_qt main.cpp mainwindow.cpp mainwindow.h ${UI_HEADERS})
+add_executable(test_qt main.cpp edge.cpp edge.h graphwidget.cpp graphwidget.h node.cpp node.h ${UI_HEADERS})
 set_target_properties(test_qt PROPERTIES COMPILE_FLAGS "${PROGRAM_COMPILE_FLAGS} " LINK_FLAGS "${EDITOR_OBJECTS_LINKER_FLAGS}")
 target_link_libraries(test_qt ${QtDeps})
 

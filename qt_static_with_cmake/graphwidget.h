@@ -48,26 +48,42 @@
 **
 ****************************************************************************/
 
-#include "graphwidget.h"
+#ifndef GRAPHWIDGET_H
+#define GRAPHWIDGET_H
 
-#include <QApplication>
-#include <QTime>
-#include <QMainWindow>
+#include <QGraphicsView>
 
-#ifdef QT_STATIC
-#	include <QtCore/QtPlugin>
-Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-#endif
+class Node;
 
-int main(int argc, char **argv)
+//! [0]
+class GraphWidget : public QGraphicsView
 {
-    QApplication app(argc, argv);
+    Q_OBJECT
 
-    GraphWidget *widget = new GraphWidget;
+public:
+    GraphWidget(QWidget *parent = 0);
 
-    QMainWindow mainWindow;
-    mainWindow.setCentralWidget(widget);
+    void itemMoved();
 
-    mainWindow.show();
-    return app.exec();
-}
+public Q_SLOTS:
+    void shuffle();
+    void zoomIn();
+    void zoomOut();
+
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+    void timerEvent(QTimerEvent *event) override;
+#if QT_CONFIG(wheelevent)
+    void wheelEvent(QWheelEvent *event) override;
+#endif
+    void drawBackground(QPainter *painter, const QRectF &rect) override;
+
+    void scaleView(qreal scaleFactor);
+
+private:
+    int timerId;
+    Node *centerNode;
+};
+//! [0]
+
+#endif // GRAPHWIDGET_H

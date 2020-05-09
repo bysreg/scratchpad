@@ -48,26 +48,38 @@
 **
 ****************************************************************************/
 
-#include "graphwidget.h"
+#ifndef EDGE_H
+#define EDGE_H
 
-#include <QApplication>
-#include <QTime>
-#include <QMainWindow>
+#include <QGraphicsItem>
 
-#ifdef QT_STATIC
-#	include <QtCore/QtPlugin>
-Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-#endif
+class Node;
 
-int main(int argc, char **argv)
+//! [0]
+class Edge : public QGraphicsItem
 {
-    QApplication app(argc, argv);
+public:
+    Edge(Node *sourceNode, Node *destNode);
 
-    GraphWidget *widget = new GraphWidget;
+    Node *sourceNode() const;
+    Node *destNode() const;
 
-    QMainWindow mainWindow;
-    mainWindow.setCentralWidget(widget);
+    void adjust();
 
-    mainWindow.show();
-    return app.exec();
-}
+    enum { Type = UserType + 2 };
+    int type() const override { return Type; }
+
+protected:
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
+private:
+    Node *source, *dest;
+
+    QPointF sourcePoint;
+    QPointF destPoint;
+    qreal arrowSize;
+};
+//! [0]
+
+#endif // EDGE_H
