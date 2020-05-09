@@ -1,0 +1,23 @@
+﻿---
+BasedOnStyle: WebKit
+Language: Cpp
+Standard: Cpp11
+
+UseTab: Always
+TabWidth: '4'
+ColumnLimit: 0
+PointerAlignment: Left
+
+BreakBeforeBraces: Allman
+
+AlwaysBreakTemplateDeclarations: 'true'
+
+NamespaceIndentation: All
+
+AlignTrailingComments: true
+
+IndentPPDirectives: AfterHash
+
+MacroBlockBegin: "^PEACH_MULTI_LINE_MACRO_BEGIN$"
+MacroBlockEnd: "^PEACH_MULTI_LINE_MACRO_END$"
+...
